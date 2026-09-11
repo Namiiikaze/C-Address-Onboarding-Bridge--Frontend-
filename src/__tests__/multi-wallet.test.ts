@@ -19,7 +19,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 // selection modal rather than calling the Freighter API directly. (#459)
 // ---------------------------------------------------------------------------
 
-const mockAuthModal = vi.fn<[], Promise<{ address: string }>>();
+const mockAuthModal = vi.fn<() => Promise<{ address: string }>>();
 const mockInit = vi.fn();
 let mockSelectedModule: { productId: string } | null = null;
 

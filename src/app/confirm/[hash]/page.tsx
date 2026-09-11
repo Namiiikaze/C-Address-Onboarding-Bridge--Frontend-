@@ -1,14 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { use, useState, useEffect } from "react";
 import { Share2, Copy, Check } from "lucide-react";
 import { isValidHash, toPublicConfirmation, getConfirmationUrl, type TransactionConfirmation, type PublicConfirmation } from "@/lib/confirmations";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 
 interface ConfirmationPageProps {
-  params: {
+  // Next.js 16 makes dynamic-route params async; this is a client component, so
+  // it unwraps them with React.use() (same pattern as transactions/[hash]).
+  params: Promise<{
     hash: string;
-  };
+  }>;
 }
 
 async function fetchConfirmation(hash: string): Promise<TransactionConfirmation | null> {
@@ -24,7 +26,7 @@ async function fetchConfirmation(hash: string): Promise<TransactionConfirmation 
 }
 
 export default function ConfirmationPage({ params }: ConfirmationPageProps) {
-  const { hash } = params;
+  const { hash } = use(params);
   const [confirmation, setConfirmation] = useState<PublicConfirmation | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

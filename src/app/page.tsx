@@ -1,7 +1,12 @@
+"use client";
+
+// This page calls useWallet() (a client hook) but was missing the directive.
+// CI never caught it because `npm ci` failed before the build step ever ran.
 import { ArrowRight, Shield, Zap, CreditCard, Building2, Globe, Code } from "lucide-react";
 import { PrefetchLink } from "@/components/prefetch-link";
 import { RecentActivityFeed } from "@/components/RecentActivityFeed";
 import { OnboardingChecklist } from "@/components/OnboardingChecklist";
+import OnboardingFlow from "@/components/onboarding-flow";
 import { useWallet } from "@/components/wallet-provider";
 
 const features = [

@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import React, { act } from "react";
+import type { MockedFunction } from "vitest";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { createRoot, Root } from "react-dom/client";
 import { screen, fireEvent } from "@testing-library/react";
@@ -62,7 +63,7 @@ const baseTransactions: BridgeTransactionData[] = [
 describe("TransactionHistory filters", () => {
   let container: HTMLDivElement;
   let root: Root;
-  let replaceStateMock: vi.MockedFunction<typeof window.history.replaceState>;
+  let replaceStateMock: MockedFunction<typeof window.history.replaceState>;
 
   beforeEach(async () => {
     vi.resetAllMocks();

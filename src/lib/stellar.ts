@@ -47,7 +47,7 @@ export async function initWalletKit(selectedWalletId?: string | null): Promise<v
   if (_kitReady || typeof window === "undefined") return;
 
   const [
-    { StellarWalletsKit, Networks: KitNetworks },
+    { StellarWalletsKit },
     { FreighterModule },
     { xBullModule },
     { LobstrModule },
@@ -651,7 +651,8 @@ async function buildSignAndSubmit(
       //   b) getNetwork returns a different known network → abort
       //   c) getNetwork rejects (Freighter locked, etc.) → abort with UNKNOWN
       try {
-        const netResult = await getNetwork();
+        const { StellarWalletsKit } = await import("@creit.tech/stellar-wallets-kit/sdk");
+        const netResult = await StellarWalletsKit.getNetwork();
         if (netResult !== undefined && netResult !== null && typeof netResult === "object") {
           // Check for in-band error (e.g. user declined access)
           if ("error" in netResult && (netResult as { error?: unknown }).error) {
@@ -679,7 +680,7 @@ async function buildSignAndSubmit(
         // getNetwork() itself rejected (Freighter locked, locked extension, etc.)
         throw new Error(
           "Network changed in wallet — please retry. " +
-          `Transaction was built for ${network} but wallet is now on ${currentNetwork}.`
+          `Transaction was built for ${network} but wallet is now on UNKNOWN.`
         );
       }
 

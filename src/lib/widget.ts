@@ -60,7 +60,7 @@ export function parseWidgetConfig(params: URLSearchParams): WidgetConfigResult {
   }
 
   const assetParam = params.get("asset");
-  const asset: WidgetAsset = assetParam === null ? "XLM" : assetParam.toUpperCase();
+  const asset = assetParam === null ? "XLM" : assetParam.toUpperCase();
   if (!isWidgetAsset(asset)) {
     return { ok: false, error: `asset must be one of: ${WIDGET_ASSETS.join(", ")}` };
   }
