@@ -3,13 +3,14 @@ import { isValidHash } from "@/lib/confirmations";
 
 interface LayoutProps {
   children: React.ReactNode;
-  params: {
+  // Next.js 16 makes dynamic-route params async.
+  params: Promise<{
     hash: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({ params }: LayoutProps): Promise<Metadata> {
-  const { hash } = params;
+  const { hash } = await params;
 
   if (!isValidHash(hash)) {
     return {

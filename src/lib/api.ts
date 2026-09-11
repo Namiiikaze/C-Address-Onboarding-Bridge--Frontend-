@@ -4,6 +4,10 @@
  * Handles health checks, transaction submission, and status polling.
  */
 import type { StellarNetwork } from "./types";
+import type { FeeTierStatus } from "./feeTiers";
+// NOTE(ci-cleanup): without this, `Lock` silently resolved to the DOM Web Locks
+// API type from lib.dom, so every lock field access failed to typecheck.
+import type { Lock } from "./locks";
 
 export interface HealthStatus {
   status: 'healthy' | 'degraded' | 'unhealthy';

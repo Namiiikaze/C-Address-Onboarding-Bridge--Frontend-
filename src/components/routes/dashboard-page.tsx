@@ -340,6 +340,7 @@ export default function DashboardPage() {
   const [faucetLoading, setFaucetLoading] = useState(false);
   const [faucetMessage, setFaucetMessage] = useState<string | null>(null);
   const [faucetError, setFaucetError] = useState<string | null>(null);
+  const [feeTierStatus, setFeeTierStatus] = useState<FeeTierStatus | null>(null);
 
   useEffect(() => {
     if (!isConnected || !address) return;

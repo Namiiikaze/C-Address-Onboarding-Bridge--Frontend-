@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from "react";
-import { connectWallet, checkConnection, getWalletAddress, getWalletNetwork, switchWalletNetwork, type SwitchNetworkResult } from "@/lib/stellar";
+import { connectWallet, checkConnection, getWalletAddress, getWalletNetwork, switchWalletNetwork, initWalletKit, openWalletSelectionModal, type SwitchNetworkResult } from "@/lib/stellar";
 import { APP_NETWORK, isSupportedNetwork, type StellarNetwork, type WalletNetworkState } from "@/lib/types";
 import { loadSession, markConnected, markDisconnected } from "@/lib/session";
 import { handleError } from "@/lib/errors";

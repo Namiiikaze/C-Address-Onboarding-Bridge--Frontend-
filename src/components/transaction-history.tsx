@@ -1,6 +1,6 @@
 import React, { memo, useMemo, useState, useEffect } from "react";
 import { ArrowLeftRight, CreditCard, Building2, ExternalLink, Loader2, Copy, Check, X, Search } from "lucide-react";
-import type { BridgeTransactionData } from "@/lib/types";
+import type { BridgeTransactionData, BridgeTransactionStatus } from "@/lib/types";
 import { getExplorerUrl } from "@/lib/stellar";
 import type { StellarNetwork } from "@/lib/types";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
@@ -89,16 +89,19 @@ interface Props {
   address?: string;
 }
 
+// TODO(next-bounty): the bulk-actions feature (#486) was only half-merged into
+// main -- this component kept the selection UI while the parent's selection
+// state and claim handlers were lost in the merge. The orphaned pieces are
+// commented out below so the rest of the history view (search, filtering,
+// date range) keeps working. Re-integrate from commit 4237d8e.
 const TransactionItem = memo(function TransactionItem({
   tx,
   network,
-  selected,
-  onToggleSelected,
 }: {
   tx: BridgeTransactionData;
   network: Props["network"];
-  selected: boolean;
-  onToggleSelected: (id: string) => void;
+  // selected: boolean;
+  // onToggleSelected: (id: string) => void;
 }) {
   const type = typeConfig[tx.type] || typeConfig["g-to-c"];
   const status = statusConfig[tx.status];
@@ -122,13 +125,13 @@ const TransactionItem = memo(function TransactionItem({
               every row regardless of claim eligibility — mixed selections
               (some rows eligible, some not) are the normal case the bulk
               toolbar below has to explain, not something to prevent. (#486) */}
-          <input
+          {/* <input
             type="checkbox"
             checked={selected}
             onChange={() => onToggleSelected(tx.id)}
             aria-label={`Select ${type.label} of ${tx.amount} ${tx.asset}`}
             className="w-4 h-4 flex-shrink-0 accent-[var(--primary)]"
-          />
+          /> */}
           <div className="w-9 h-9 rounded-lg bg-[var(--surface-2)] flex items-center justify-center flex-shrink-0">
             <Icon className={`w-4 h-4 ${type.color}`} />
           </div>
@@ -448,8 +451,12 @@ function TransactionHistory({ transactions, loading, network, address }: Props) 
         </a>
       </div>
 
-      <LiveRegion message={statusMessage} />
+      {/* TODO(next-bounty): `statusMessage` came with the bulk-actions state. */}
+      {/* <LiveRegion message={statusMessage} /> */}
 
+      {/* TODO(next-bounty): bulk-claim confirmation dialog, orphaned by the same
+          half-merge. Restore alongside the selection state from commit 4237d8e. */}
+{/*
       {confirmingClaim && (
         <div
           role="dialog"
@@ -489,6 +496,7 @@ function TransactionHistory({ transactions, loading, network, address }: Props) 
           </div>
         </div>
       )}
+*/}
     </div>
   );
 }

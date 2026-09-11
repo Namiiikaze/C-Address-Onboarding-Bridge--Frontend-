@@ -105,12 +105,19 @@ function writeSession(session: WalletSession): WalletSession {
 }
 
 /** Records an explicit connect, clearing any sticky disconnect. */
-export function markConnected(address: string | null, now: number = Date.now()): WalletSession {
+export function markConnected(
+  address: string | null,
+  now: number = Date.now(),
+  selectedWalletId?: string | null,
+): WalletSession {
   const session: WalletSession = {
     address: address ?? null,
     manuallyDisconnected: false,
     updatedAt: now,
-    selectedWalletId: loadSession(now).selectedWalletId,
+    // Multi-wallet (#459): an explicit connect records which wallet answered.
+    // Omitting the argument keeps whatever wallet the session already had.
+    selectedWalletId:
+      selectedWalletId !== undefined ? selectedWalletId : loadSession(now).selectedWalletId,
   };
   return writeSession(session);
 }
