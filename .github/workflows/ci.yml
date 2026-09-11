@@ -37,14 +37,13 @@ jobs:
         env:
           ENFORCE_BUDGET: "true"
 
-  # TODO(next-bounty): non-blocking until someone verifies it end to end. This
-  # job never once completed during the first bounty programme -- `npm ci` failed
-  # on every run before Playwright was ever invoked -- so the specs in e2e/ have
-  # no known-good baseline. Green it, then remove continue-on-error.
+  # Blocking. The specs in e2e/ are currently skipped (see the TODO at the top
+  # of e2e/funding-flow.spec.ts -- their selectors drifted while this job could
+  # not run), but the job still starts the app via Playwright's webServer, so a
+  # dev server that fails to boot -- as it did under Next 16 -- fails CI.
   e2e-tests:
     name: End-to-End Tests
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 

@@ -36,6 +36,21 @@ vi.mock("@/lib/stellar", async (importOriginal) => {
   };
 });
 
+// Keep the dashboard's secondary panels off the real network. Without this, the
+// claims panel's listIncomingLocks() and the fee-tier preview fetched
+// api.example.com for real. On CI runners that fails instantly and renders a
+// second role="alert" ("Couldn't refresh locked transfers"); with slower DNS it
+// had not rendered yet. So the balance-failure test passed or failed depending
+// on the network rather than on the code.
+vi.mock("@/lib/api", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/api")>();
+  return {
+    ...actual,
+    listIncomingLocks: vi.fn().mockResolvedValue([]),
+    getFeeTierPreview: vi.fn().mockResolvedValue(null),
+  };
+});
+
 vi.mock("@/hooks/useCopyToClipboard", () => ({
   useCopyToClipboard: () => ({ status: "idle", copy: vi.fn(), reset: vi.fn() }),
 }));
