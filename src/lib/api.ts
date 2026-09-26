@@ -3,7 +3,7 @@
  *
  * Handles health checks, transaction submission, and status polling.
  */
-import type { StellarNetwork } from "./types";
+import type { BridgeTransactionData, StellarNetwork } from "./types";
 import type { FeeTierStatus } from "./feeTiers";
 // NOTE(ci-cleanup): without this, `Lock` silently resolved to the DOM Web Locks
 // API type from lib.dom, so every lock field access failed to typecheck.
@@ -258,32 +258,66 @@ export async function getFeeTierPreview(address: string, network: StellarNetwork
 }
 
 /**
- * Referral statistics (#469).
+ * Transaction export (#470).
  *
- * PLACEHOLDER INTERFACE: see `src/lib/referrals.ts` for why — no contract
- * source or referral API route exists anywhere in this repo to build against
- * yet. The route (`GET /referrals/stats?address=&network=`) and response
- * shape are a best guess and must be reconciled against the real API once it
- * lands.
+ * PLACEHOLDER INTERFACE: this repo vendors no real API client for a
+ * transaction export route yet (no contract source, no export-related route,
+ * nothing in docs or elsewhere in `src/lib` — checked before writing this,
+ * the same way #465's batch cap, #467's lock/claim shape, and #468's
+ * fee-tier preview were). The route (`GET /transactions/export`), its query
+ * params, and the paginated response shape below are a best guess and MUST
+ * be reconciled against the real API once it lands.
  *
- * Returns null both when the request fails and when the account genuinely
- * has no referral record yet, mirroring `getFeeTierPreview`'s never-throws
- * contract. Unlike fee tiers, though, a null result here means the whole
- * view can't render — the referral link/QR need `referralCode` — so the UI
- * shows a retry rather than silently hiding, since (unlike the supplementary
- * fee-tier card) this page exists entirely to show that link.
+ * Modeled as cursor-paginated pages of the same `BridgeTransactionData` rows
+ * used everywhere else in the app, rather than the server pre-formatting
+ * CSV/JSON text: every page has a uniform shape regardless of the chosen
+ * format, the client builds the final file with the formatting helpers in
+ * `src/lib/transactionExport.ts`, and the UI gets real per-page progress
+ * without needing to parse a partial CSV/JSON stream.
  */
-export async function getReferralStats(address: string, network: StellarNetwork): Promise<ReferralStats | null> {
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/referrals/stats?address=${encodeURIComponent(address)}&network=${encodeURIComponent(network)}`
-    );
-    if (!response.ok) return null;
-    return (await response.json()) as ReferralStats | null;
-  } catch (error) {
-    console.error('Failed to fetch referral stats:', error);
-    return null;
+export type ExportFormat = "csv" | "json";
+
+export interface ExportTransactionsParams {
+  address: string;
+  network: StellarNetwork;
+  /** Inclusive range, epoch milliseconds. */
+  from: number;
+  to: number;
+  /** Opaque cursor returned by the previous page; omit to fetch the first page. */
+  cursor?: string;
+}
+
+export interface ExportTransactionsPage {
+  rows: BridgeTransactionData[];
+  /** Cursor for the next page, or null once this was the last page. */
+  nextCursor: string | null;
+  /**
+   * Total row count across the whole export, when the server can report it
+   * up front (used to render determinate progress). Null when unknown — the
+   * UI falls back to a running "N rows so far" count instead of a percentage.
+   */
+  totalCount: number | null;
+}
+
+/** Rows requested per export page. The server may return fewer. */
+const EXPORT_PAGE_SIZE = 200;
+
+/** Fetches one page of a date-ranged transaction export. Throws on any non-2xx response. */
+export async function fetchTransactionExportPage(params: ExportTransactionsParams): Promise<ExportTransactionsPage> {
+  const query = new URLSearchParams({
+    address: params.address,
+    network: params.network,
+    from: String(params.from),
+    to: String(params.to),
+    limit: String(EXPORT_PAGE_SIZE),
+  });
+  if (params.cursor) query.set("cursor", params.cursor);
+
+  const response = await fetch(`${API_BASE_URL}/transactions/export?${query.toString()}`);
+  if (!response.ok) {
+    throw new Error(await extractApiErrorMessage(response, `Export request failed (${response.status})`));
   }
+  return (await response.json()) as ExportTransactionsPage;
 }
 
 /**
